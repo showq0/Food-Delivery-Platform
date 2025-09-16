@@ -15,6 +15,7 @@ class Order(DirtyFieldsMixin, models.Model):
     ]
 
     customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    driver = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders_as_driver')
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
 
