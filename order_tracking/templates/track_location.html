@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        #trackLog { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
+        #messageInput { width: 80%; padding: 5px; }
+        #sendBtn { padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <h2>WebSocket tracking Location</h2>
+    <h2>{{order_id}}</h2>
+
+    <div id="trackLog"></div>
+    <script>
+        const orderId = {{ order_id }};
+        const trackLog = document.getElementById('trackLog');
+
+        const chatSocket = new WebSocket(
+               `ws://${window.location.host}/ws/track-location/${orderId}/`
+
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const messageElem = document.createElement('div');
+            messageElem.textContent = JSON.stringify(data);
+            trackLog.appendChild(messageElem);
+            trackLog.scrollTop = trackLog.scrollHeight; // auto-scroll
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('tracking location closed');
+            const messageElem = document.createElement('div');
+            messageElem.textContent = "Connection closed.";
+            trackLog.appendChild(messageElem);
+        };
+
+    </script>
+</body>
+</html>

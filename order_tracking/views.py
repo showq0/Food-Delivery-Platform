@@ -50,3 +50,17 @@ async def sse_stream(request, order_id):
                 yield "alive\n\n"
 
     return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+
+
+def track_location(request, order_id):
+    order = {
+        'order_id': order_id
+    }
+    return render(request, "track_location.html", order)
+
+
+def send_driver_location(request, order_id):
+    order = {
+        'order_id': order_id
+    }
+    return render(request, "send_location.html", order)
