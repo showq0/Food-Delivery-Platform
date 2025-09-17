@@ -12,14 +12,18 @@ import os
 from django.core.asgi import get_asgi_application
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
+
+import customer_support_chat.routing
 import order_tracking.routing
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'food_delivery_platform.settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            order_tracking.routing.websocket_urlpatterns
+            order_tracking.routing.websocket_urlpatterns + customer_support_chat.routing.websocket_urlpatterns
+
         )
     ),
 })
