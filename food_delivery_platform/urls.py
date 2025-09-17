@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('account/',include('account_management.urls')),
     path('order/', include('order_tracking.urls')),
+    path('chat/', include('customer_support_chat.urls')),
 
 ]

@@ -6,9 +6,11 @@ from django.contrib.auth.models import AbstractUser
 class User(AbstractUser):
     CUSTOMER = 'customer'
     DRIVER = 'driver'
+    AGENT = 'agent'
     ROLE_CHOICES = [
         (CUSTOMER, 'Customer'),
         (DRIVER, 'Driver'),
+        (AGENT, 'Agent'),
     ]
     role = models.CharField(
         max_length=8,

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Chat</title>
+    <style>
+        #chat-box {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Chat {{chat_name}}</h2>
+    <h3>name: {{ request.user.username }}</h3>
+   <div id="chat-box">
+       {% for message in messages %}
+           <p><b>{{ message.sender.username }}:</b> {{ message.content }}</p>
+       {% endfor %}
+   </div>
+   <div id="typingIndicator"></div>
+
+    <input type="text" id="message-input" placeholder="Type a message..." />
+    <button id="send-btn">Send</button>
+    <script>
+        const sender_name = "{{ request.user.username }}";
+        const sender_id = "{{ request.user.id }}";
+        const chat_id = {{ chat_id }};
+        const inputField = document.getElementById('message-input');
+        const typingDiv = document.getElementById('typingIndicator');
+        let typingTimeout;
+
+
+        const socket = new WebSocket(`ws://${window.location.host}/ws/messages/${chat_id}/`);
+
+        socket.onerror = function(err) {
+            console.error("WebSocket error:", err);
+        };
+
+        socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.event_type === 'message')
+        {
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<p><b> ${data.sender_name}:</b> ${data.message}</p>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        else if (data.event_type === 'typing') {
+            if (sender_id != data.sender_id) {
+                if (data.typing_status === 'start') {
+                    showTypingIndicator(data.sender_name);
+                } else if (data.typing_status === 'stop') {
+                    hideTypingIndicator();
+                }
+            }
+        }
+
+        };
+
+        socket.onopen = function(e) {
+            document.getElementById("send-btn").onclick = function() {
+                const message = inputField.value;
+                if (message.trim()) {
+                    socket.send(JSON.stringify({
+                        event_type: 'message',
+                        message: message,
+                        sender_name: sender_name,
+                        sender_id: sender_id
+                    }));
+                    inputField.value = "";
+                }
+            };
+        };
+         function showTypingIndicator(sender) {
+
+            typingDiv.textContent = `${sender} is typing...`;
+         }
+         function hideTypingIndicator() {
+            typingDiv.textContent = '';
+         }
+
+         inputField.addEventListener('input', () => {
+            socket.send(JSON.stringify({
+              event_type: 'typing',
+              sender_name: sender_name,
+              sender_id: sender_id,
+              typing_status: 'start',
+            }));
+
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+              socket.send(JSON.stringify({
+                event_type: 'typing',
+                sender_id: sender_id,
+                sender_name: sender_name,
+                typing_status: 'stop'
+              }));
+          }, 2000);
+        });
+    </script>
+</body>
+</html>

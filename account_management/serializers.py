@@ -9,7 +9,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     role = serializers.ChoiceField(choices=[
         ('customer', 'Customer'),
-        ('driver', 'Driver')
+        ('driver', 'Driver'),
+        ('agent', 'Agent')
     ])
 
     class Meta:
